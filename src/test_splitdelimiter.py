@@ -171,3 +171,157 @@ class TestSplitDelimiter(unittest.TestCase):
             ],
             new_nodes,
         )
+
+
+    def test_text_to_textnodes(self):
+        text = "This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        new_nodes = text_to_textnodes(text)
+        self.assertListEqual(
+            [
+              TextNode("This is ", TextType.TEXT),
+              TextNode("text", TextType.BOLD),
+              TextNode(" with an ", TextType.TEXT),
+              TextNode("italic", TextType.ITALIC),
+              TextNode(" word and a ", TextType.TEXT),
+              TextNode("code block", TextType.CODE),
+              TextNode(" and an ", TextType.TEXT),
+              TextNode("obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"),
+              TextNode(" and a ", TextType.TEXT),
+              TextNode("link", TextType.LINK, "https://boot.dev"),
+            ],
+            new_nodes
+        )
+    def test_text_to_textnodes_plain(self):
+      text = "Just a plain sentence."
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [TextNode("Just a plain sentence.", TextType.TEXT)],
+        new_nodes
+      )
+
+    def test_text_to_textnodes_bold(self):
+      text = "This is **bold** text."
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [
+          TextNode("This is ", TextType.TEXT),
+          TextNode("bold", TextType.BOLD),
+          TextNode(" text.", TextType.TEXT),
+        ],
+        new_nodes
+      )
+
+    def test_text_to_textnodes_italic(self):
+      text = "This is _italic_ text."
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [
+          TextNode("This is ", TextType.TEXT),
+          TextNode("italic", TextType.ITALIC),
+          TextNode(" text.", TextType.TEXT),
+        ],
+        new_nodes
+      )
+
+    def test_text_to_textnodes_code(self):
+      text = "Here is `code`."
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [
+          TextNode("Here is ", TextType.TEXT),
+          TextNode("code", TextType.CODE),
+          TextNode(".", TextType.TEXT),
+        ],
+        new_nodes
+      )
+
+    def test_text_to_textnodes_image(self):
+      text = "Here is an ![img](https://img.com/img.png)."
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [
+          TextNode("Here is an ", TextType.TEXT),
+          TextNode("img", TextType.IMAGE, "https://img.com/img.png"),
+          TextNode(".", TextType.TEXT),
+        ],
+        new_nodes
+      )
+
+    def test_text_to_textnodes_link(self):
+      text = "A [link](https://example.com) here."
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [
+          TextNode("A ", TextType.TEXT),
+          TextNode("link", TextType.LINK, "https://example.com"),
+          TextNode(" here.", TextType.TEXT),
+        ],
+        new_nodes
+      )
+
+    def test_text_to_textnodes_combined(self):
+      text = "Mix **bold** and _italic_ and `code` and ![img](url) and [link](url2)"
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [
+          TextNode("Mix ", TextType.TEXT),
+          TextNode("bold", TextType.BOLD),
+          TextNode(" and ", TextType.TEXT),
+          TextNode("italic", TextType.ITALIC),
+          TextNode(" and ", TextType.TEXT),
+          TextNode("code", TextType.CODE),
+          TextNode(" and ", TextType.TEXT),
+          TextNode("img", TextType.IMAGE, "url"),
+          TextNode(" and ", TextType.TEXT),
+          TextNode("link", TextType.LINK, "url2"),
+        ],
+        new_nodes
+      )
+
+    def test_text_to_textnodes_multiple_images_links(self):
+      text = "![a](a.png) and [b](b.com) and ![c](c.png)"
+      new_nodes = text_to_textnodes(text)
+      self.assertListEqual(
+        [
+          TextNode("a", TextType.IMAGE, "a.png"),
+          TextNode(" and ", TextType.TEXT),
+          TextNode("b", TextType.LINK, "b.com"),
+          TextNode(" and ", TextType.TEXT),
+          TextNode("c", TextType.IMAGE, "c.png"),
+        ],
+        new_nodes
+      )
+
+
+    def test_markdown_to_blocks(self):
+      md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+      blocks = markdown_to_blocks(md)
+      self.assertEqual(
+          blocks,
+          [
+              "This is **bolded** paragraph",
+              "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+              "- This is a list\n- with items",
+          ],
+      )
+
+    def test_markdown_to_blocks_empty(self):
+        md = """
+
+
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, [])
+
+    def test_markdown_to_blocks_single(self):
+        md = """Single paragraph without double newlines."""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(blocks, ["Single paragraph without double newlines."])
