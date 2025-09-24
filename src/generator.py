@@ -1,5 +1,6 @@
 import converter
 import os
+import block
 
 def extract_title(markdown):
     lines = markdown.split("\n")
@@ -15,9 +16,9 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(markdown)
     with open(template_path, "r", encoding="utf-8") as f:
         template = f.read()
-    html_node = converter.markdown_to_html_node(markdown)
+    html_node = block.markdown_to_html_node(markdown)
     html_content = html_node.to_html()
-    final_html = template.replace("{{title}}", title).replace("{{content}}", html_content)
+    final_html = template.replace("{{ Title }}", title).replace("{{ Content }}", html_content)
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
     with open(dest_path, "w", encoding="utf-8") as f:
         f.write(final_html)
