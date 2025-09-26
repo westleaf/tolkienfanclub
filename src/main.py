@@ -3,15 +3,22 @@ import os
 import shutil
 from utils import copy_files
 from generator import generate_page, generate_page_recursive
+import sys
 
 dir_static = "./static"
-dir_public = "./public"
+dir_public = "./docs"
+
+
+if len(sys.argv) > 1:
+    basepath = sys.argv[1]
+else:
+    basepath = "/"
+
 
 def main():
     cleanup_public()
     copy_static_files()
-    generate_page_recursive("content", "template.html", dir_public)
-    # generate_page("content/index.md", "template.html", os.path.join(dir_public, "index.html"))
+    generate_page_recursive("content", "template.html", dir_public, basepath)
 
 
 def cleanup_public():
